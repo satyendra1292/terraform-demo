@@ -1,19 +1,38 @@
-terraform {
-  required_providers {
-    azurerm = {
-      source = "hashicorp/azurerm"
-      version = "~>4.0"
-    }
-  }
-}
+trigger:
+- main
 
-provider "azurerm" {
-  features {}
-  subscription_id = "8c034ec7-efde-401c-8207-872a04ac8fed
-"
-}
+pool:
+  vmImage: ubuntu-latest
 
-resource "azurerm_resource_group" "rg" {
-  name     = "rg-sattu-demo"
-  location = "Central India"
-}
+steps:
+
+- task: TerraformInstaller@1
+  inputs:
+    terraformVersion: latest
+
+- task: TerraformTaskV4@4
+  displayName: Terraform Init
+  inputs:
+    provider: azurerm
+    command: init
+    backendServiceArm: azure-sc
+
+- task: TerraformTaskV4@4
+  displayName: Terraform Validate
+  inputs:
+    provider: azurerm
+    command: validate
+
+- task: TerraformTaskV4@4
+  displayName: Terraform Plan
+  inputs:
+    provider: azurerm
+    command: plan
+    environmentServiceNameAzureRM: azure-sc
+
+- task: TerraformTaskV4@4
+  displayName: Terraform Apply
+  inputs:
+    provider: azurerm
+    command: apply
+    environmentServiceNameAzureRM: azure-sc
